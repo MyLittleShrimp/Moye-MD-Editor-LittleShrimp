@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.build/
+release/
+test-results/
+*.user
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.codex/
+.agents/
+__pycache__/
+*.pyc
+/docs/media/Moye Intro.mp4

@@ -1,0 +1,48 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Test renderer and paste handling
+        run: npm test
+      - name: Test native file operations
+        shell: powershell
+        run: ./scripts/test-native.ps1
+      - name: Build portable app
+        shell: powershell
+        run: ./scripts/build.ps1 -OutputName Moye-1.1.0
+      - name: Ensure Edge for UI tests
+        run: npx playwright install msedge
+      - name: Test browser interface
+        run: npm run test:ui
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Moye-1.1.0-Windows-x64
+          path: release/Moye-1.1.0/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: ui-test-screenshots
+          path: test-results/*.png
+          if-no-files-found: ignore
